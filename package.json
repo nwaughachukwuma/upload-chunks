@@ -1,0 +1,17 @@
+{
+  "name": "upload-chunks",
+  "version": "0.0.1",
+  "description": "Code examples for chunk uploads to different storage providers.",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "@mux/upchunk": "^2.2.2"
+  }
+}

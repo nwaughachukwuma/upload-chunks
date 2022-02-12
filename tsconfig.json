@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "es6",
+		"lib": ["es6", "dom"],
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"outDir": "lib",
+		"baseUrl": ".",
+		"declaration": true,
+		"checkJs": true
+	},
+	"include": ["index.ts", "**/*.d.ts"],
+	"exclude": ["node_modules", "lib"]
+}
