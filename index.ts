@@ -1,2 +1,2 @@
-export * from "./chunkUploadFile";
+export * from "./cloudinaryUpChunk";
 export * from "./muxUpChunk";

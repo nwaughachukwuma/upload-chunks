@@ -5,7 +5,7 @@ interface FileChunk {
 }
 
 /**
-   * ## chunkUploadFile
+   * ## cloudinaryUpChunk
    * This function takes a file and chunks it up into smaller chunks for uploading to Cloudinary.
    * 
    * ### Usage
@@ -16,13 +16,16 @@ interface FileChunk {
       
       const file = e.target.files[0];
       const chunkSize = 1024 * 1024 * 5; // 5MB
-      await chunkUploadFile(file, chunkSize)
+      await cloudinaryUpChunk(file, chunkSize)
     });
    ```
    * @param file 
    * @param chunkSize 
    */
-export async function chunkUploadFile(file: File, chunkSize: number = 5000000) {
+export async function cloudinaryUpChunk(
+  file: File,
+  chunkSize: number = 5000000
+) {
   const fileChunks: FileChunk[] = [];
   for (let i = 0; i <= file.size; i += chunkSize) {
     const end = i + chunkSize;
