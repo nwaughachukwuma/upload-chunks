@@ -2,9 +2,11 @@
   "name": "upload-chunks",
   "version": "0.0.1",
   "description": "Code examples for chunk uploads to different storage providers.",
-  "main": "index.ts",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -b .",
+    "build:watch": "tsc -b . --watch"
   },
   "author": "",
   "license": "ISC",
