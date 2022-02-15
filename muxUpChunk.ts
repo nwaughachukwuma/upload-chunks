@@ -21,7 +21,7 @@ import * as UpChunk from "@mux/upchunk";
  * @param options
  * @returns
  */
-export default async function muxUpchunk(options: UpChunk.UpChunkOptions) {
+export async function muxUpchunk(options: UpChunk.UpChunkOptions) {
   const upload = UpChunk.createUpload({
     endpoint: options.endpoint,
     file: options.file,
@@ -44,3 +44,5 @@ export default async function muxUpchunk(options: UpChunk.UpChunkOptions) {
     });
   });
 }
+
+export default muxUpchunk;
