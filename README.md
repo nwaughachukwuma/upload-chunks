@@ -7,20 +7,28 @@ Code examples for chunk uploads to different storage providers.
 ```ts
 import cloudinaryUpChunk from './cloudinaryUpChunk'
 
+const options = {
+  url: "https://api.cloudinary.com/v1_1/demo/upload", 
+  appendToFormData: {
+    upload_preset: "demo_upload_preset",
+    public_id: "test_id",
+    cloud_name: "demo"
+  },
+  headers: {
+    "X-Requested-With": "XMLHttpRequest",
+    "X-Unique-Upload-Id": `${Date.now()}`,
+    ...
+  }
+}
+
 picker = document.getElementById("file_picker");
 picker.addEventListener("onchange", async (e) => {
     e.preventDefault();
     
     const file = e.target.files[0];
     const chunkSize = 1024 * 1024 * 5; // 5MB
-    await cloudinaryUpChunk(file, chunkSize)
+    await cloudinaryUpChunk(file, options, chunkSize)
 });
-
-// Note: You'll need the following parameters from your Cloudinary account:
-// const UPLOAD_PRESET = "your-upload-preset";
-// const CLOUD_NAME = "your-cloud-name";
-// const PUBLIC_ID = "your-public-id";
-// const CLOUDINARY_UPLOAD_URL = "https://api.cloudinary.com/.../.../upload";
 ```
 
 2. Mux Chunk Uploads
