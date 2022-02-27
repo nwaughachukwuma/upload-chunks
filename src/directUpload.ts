@@ -1,10 +1,4 @@
-export interface UploadOptions {
-  /** upload url to the storage service */
-  url: string;
-  appendToFormData?: Record<string, any>;
-  /** headers to be sent with the request */
-  headers?: Record<string, any>;
-}
+import type { UploadOptions } from "./types";
 
 export default async function directUpload(file: File, options: UploadOptions) {
   const { url, appendToFormData = {}, headers } = options;
