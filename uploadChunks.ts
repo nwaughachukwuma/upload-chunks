@@ -24,7 +24,7 @@ export default async function chunkedUpload(
   async function send(chunk: Blob, start: number, end: number, size: number) {
     console.log({ start, end, size });
 
-    const { url, appendToFormData = {} } = options;
+    const { url, appendToFormData = {}, headers } = options;
     const formdata = new FormData();
 
     formdata.append("file", chunk);
@@ -35,7 +35,9 @@ export default async function chunkedUpload(
     const xhr = new XMLHttpRequest();
     await new Promise((resolve, reject) => {
       xhr.open("POST", url, false);
-      xhr.setRequestHeader("X-Unique-Upload-Id", XUniqueUploadId);
+      for (const header in headers) {
+        xhr.setRequestHeader(header, headers[header]);
+      }
       xhr.setRequestHeader(
         "Content-Range",
         "bytes " + start + "-" + end + "/" + size
