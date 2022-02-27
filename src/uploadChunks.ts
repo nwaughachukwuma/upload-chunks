@@ -5,9 +5,6 @@ export default async function chunkedUpload(
   options: UploadOptions,
   chunkSize: number = 1024 * 1024 * 5
 ) {
-  const XUniqueUploadId = `${Date.now()}`;
-  console.log(XUniqueUploadId);
-
   function noop() {}
 
   function slice(file: File, start: number, end: number) {
@@ -17,13 +14,12 @@ export default async function chunkedUpload(
 
   async function send(chunk: Blob, start: number, end: number, size: number) {
     console.log({ start, end, size });
-
     const { url, appendToFormData = {}, headers } = options;
-    const formdata = new FormData();
+    const formData = new FormData();
 
-    formdata.append("file", chunk);
+    formData.append("file", chunk);
     for (const key in appendToFormData) {
-      formdata.append(key, appendToFormData[key]);
+      formData.append(key, appendToFormData[key]);
     }
 
     const xhr = new XMLHttpRequest();
@@ -32,10 +28,7 @@ export default async function chunkedUpload(
       for (const header in headers) {
         xhr.setRequestHeader(header, headers[header]);
       }
-      xhr.setRequestHeader(
-        "Content-Range",
-        "bytes " + start + "-" + end + "/" + size
-      );
+      xhr.setRequestHeader("Content-Range", `bytes ${start}-${end}/${size}`);
 
       xhr.onload = function () {
         console.log(this.responseText);
@@ -46,7 +39,7 @@ export default async function chunkedUpload(
         reject(this.responseText);
       };
 
-      xhr.send(formdata);
+      xhr.send(formData);
     });
   }
 
