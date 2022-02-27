@@ -1,6 +1,5 @@
 <script lang="ts">
-  import UploadFile from "./UploadFile.svelte";
-
+  import UploadFile from "./lib/components/UploadFile.svelte";
   export let name: string;
 </script>
 
