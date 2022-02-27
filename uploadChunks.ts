@@ -1,10 +1,4 @@
-interface FileChunk {
-  start: number;
-  end: number;
-  blob: Blob;
-}
-
-export interface UploadOptions {
+interface UploadOptions {
   /** upload url to the storage service */
   url: string;
   appendToFormData?: Record<string, any>;
@@ -12,84 +6,71 @@ export interface UploadOptions {
   headers?: Record<string, any>;
 }
 
-/**
-   * ## uploadChunks
-   * This function takes a file and chunks it up into smaller chunks for uploading to Cloudinary.
-   * 
-   * ### Usage
-   ```ts
-   picker = document.getElementById("file_picker");
-    picker.addEventListener("onchange", async (e) => {
-      e.preventDefault();
-      
-      const file = e.target.files[0];
-      const options = {url: "https://api.cloudinary.com/v1_1/demo/upload", appendToFormData: {upload_preset: "demo_upload_preset"}};
-      const chunkSize = 1024 * 1024 * 5; // 5MB
-      await uploadChunks(file, options chunkSize)
-    });
-   ```
-   * @param file 
-   * @param options 
-   * @param chunkSize 
-   */
-export async function uploadChunks(
+export default async function chunkedUpload(
   file: File,
   options: UploadOptions,
-  chunkSize: number = 5000000
+  chunkSize: number = 1024 * 1024 * 5 //20000000
 ) {
-  const fileChunks = getChunks(file, chunkSize);
+  const XUniqueUploadId = `${Date.now()}`;
 
-  for (const chunk of fileChunks) {
-    console.log(
-      `chunk is := start: ${chunk.start}; end: ${chunk.end}; file: ${chunk.blob}`
+  function slice(file: File, start: number, end: number) {
+    const slice = file.slice || noop;
+    return slice.bind(file)(start, end);
+  }
+
+  function noop() {}
+
+  function send(piece: Blob, start: number, end: number, size: number) {
+    console.log("start ", start);
+    console.log("end", end);
+
+    const formdata = new FormData();
+    console.log(XUniqueUploadId);
+
+    const { url, appendToFormData = {} } = options;
+
+    formdata.append("file", piece);
+    for (const key in appendToFormData) {
+      formdata.append(key, appendToFormData[key]);
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url, false);
+    xhr.setRequestHeader("X-Unique-Upload-Id", XUniqueUploadId);
+    xhr.setRequestHeader(
+      "Content-Range",
+      "bytes " + start + "-" + end + "/" + size
     );
-    await uploader(chunk, file.size, options);
+
+    xhr.onload = function () {
+      // do something to response
+      console.log(this.responseText);
+    };
+
+    xhr.send(formdata);
   }
+
+  function processFile(file: File) {
+    const size = file.size;
+    const sliceSize = chunkSize;
+    let start = 0;
+
+    setTimeout(loop, 3);
+
+    function loop() {
+      let end = start + sliceSize;
+
+      if (end > size) {
+        end = size;
+      }
+      const s = slice(file, start, end);
+      send(s, start, end - 1, size);
+      if (end < size) {
+        start += sliceSize;
+        setTimeout(loop, 3);
+      }
+    }
+  }
+
+  processFile(file);
 }
-
-export async function uploader(
-  chunk: FileChunk,
-  totalSize: number,
-  options: UploadOptions
-) {
-  const { start, end, blob } = chunk;
-  const formData = new FormData();
-  const { url, appendToFormData, headers } = options;
-
-  formData.append("file", blob);
-  if (appendToFormData) {
-    Object.keys(appendToFormData).forEach((key) => {
-      formData.append(key, appendToFormData[key]);
-    });
-  }
-
-  const response = await fetch(url, {
-    method: "POST",
-    body: formData,
-    headers: {
-      "X-Unique-Upload-Id": `${Date.now()}`,
-      "Content-Range": "bytes " + start + "-" + end + "/" + totalSize,
-      ...headers,
-    },
-    mode: "no-cors",
-  });
-
-  if (response.ok) {
-    const json = await response.json();
-    console.log(json);
-  } else {
-    console.log("error", response.statusText);
-  }
-}
-
-export function getChunks(file: File, chunkSize: number) {
-  const fileChunks: FileChunk[] = [];
-  for (let i = 0; i <= file.size; i += chunkSize) {
-    const end = i + chunkSize;
-    fileChunks.push({ start: i, end, blob: file.slice(i, end) });
-  }
-
-  return fileChunks;
-}
-
-export default uploadChunks;
