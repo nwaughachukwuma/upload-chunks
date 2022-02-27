@@ -9,68 +9,64 @@ interface UploadOptions {
 export default async function chunkedUpload(
   file: File,
   options: UploadOptions,
-  chunkSize: number = 1024 * 1024 * 5 //20000000
+  chunkSize: number = 1024 * 1024 * 5
 ) {
   const XUniqueUploadId = `${Date.now()}`;
+  console.log(XUniqueUploadId);
+
+  function noop() {}
 
   function slice(file: File, start: number, end: number) {
     const slice = file.slice || noop;
     return slice.bind(file)(start, end);
   }
 
-  function noop() {}
-
-  function send(piece: Blob, start: number, end: number, size: number) {
-    console.log("start ", start);
-    console.log("end", end);
-
-    const formdata = new FormData();
-    console.log(XUniqueUploadId);
+  async function send(chunk: Blob, start: number, end: number, size: number) {
+    console.log({ start, end, size });
 
     const { url, appendToFormData = {} } = options;
+    const formdata = new FormData();
 
-    formdata.append("file", piece);
+    formdata.append("file", chunk);
     for (const key in appendToFormData) {
       formdata.append(key, appendToFormData[key]);
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", url, false);
-    xhr.setRequestHeader("X-Unique-Upload-Id", XUniqueUploadId);
-    xhr.setRequestHeader(
-      "Content-Range",
-      "bytes " + start + "-" + end + "/" + size
-    );
+    await new Promise((resolve, reject) => {
+      xhr.open("POST", url, false);
+      xhr.setRequestHeader("X-Unique-Upload-Id", XUniqueUploadId);
+      xhr.setRequestHeader(
+        "Content-Range",
+        "bytes " + start + "-" + end + "/" + size
+      );
 
-    xhr.onload = function () {
-      // do something to response
-      console.log(this.responseText);
-    };
+      xhr.onload = function () {
+        console.log(this.responseText);
+        resolve(this.responseText);
+      };
 
-    xhr.send(formdata);
+      xhr.onerror = function () {
+        reject(this.responseText);
+      };
+
+      xhr.send(formdata);
+    });
   }
 
-  function processFile(file: File) {
+  async function uploadFile(file: File) {
     const size = file.size;
-    const sliceSize = chunkSize;
-    let start = 0;
 
-    setTimeout(loop, 3);
-
-    function loop() {
-      let end = start + sliceSize;
-
+    for (let start = 0; start <= size; start += chunkSize) {
+      let end = start + chunkSize;
       if (end > size) {
         end = size;
       }
-      const s = slice(file, start, end);
-      send(s, start, end - 1, size);
-      if (end < size) {
-        start += sliceSize;
-        setTimeout(loop, 3);
-      }
+
+      const blob = slice(file, start, end);
+      await send(blob, start, end - 1, size);
     }
   }
 
-  processFile(file);
+  await uploadFile(file);
 }
