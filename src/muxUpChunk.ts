@@ -35,7 +35,7 @@ export async function muxUpchunk(options: UpChunk.UpChunkOptions) {
     });
 
     upload.on("progress", (progress) => {
-      console.log(`So far we've uploaded ${progress.detail}% of this file.`);
+      console.log(`${progress.detail}% of the file has been uploaded`);
     });
 
     upload.on("success", (result) => {

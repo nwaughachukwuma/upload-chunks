@@ -1,6 +1,6 @@
 import type { UploadOptions } from "./types";
 
-export default async function directUpload(file: File, options: UploadOptions) {
+export async function directUpload(file: File, options: UploadOptions) {
   const { url, appendToFormData = {}, headers } = options;
   const formData = new FormData();
 
@@ -24,3 +24,5 @@ export default async function directUpload(file: File, options: UploadOptions) {
 
   console.log({ response });
 }
+
+export default directUpload;

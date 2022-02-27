@@ -1,6 +1,33 @@
 import type { UploadOptions } from "./types";
 
-export default async function chunkedUpload(
+/**
+ * ## chunkedUpload
+ * 
+ * ### Example usage:
+ * uploading to cloudinary
+ * ```ts
+  picker = document.getElementById("file_picker");
+  picker.addEventListener("onchange", async (e) => {
+    e.preventDefault();
+
+    const file = e.target.files[0];
+    await chunkedUpload(file, {
+      url: CLOUDINARY_UPLOAD_URL,
+      appendToFormData: {
+        upload_preset: "upload_preset",
+        cloud_name: "cloud_name",
+        tags: ["tag1", "tag2"],
+        public_id: `public_id`,
+      },
+      headers: {},
+    });
+  });
+ * ```
+ * @param file 
+ * @param options 
+ * @param chunkSize 
+ */
+export async function chunkedUpload(
   file: File,
   options: UploadOptions,
   chunkSize: number = 1024 * 1024 * 5
@@ -28,6 +55,7 @@ export default async function chunkedUpload(
       for (const header in headers) {
         xhr.setRequestHeader(header, headers[header]);
       }
+      xhr.setRequestHeader("X-Unique-Upload-Id", `${Date.now()}`);
       xhr.setRequestHeader("Content-Range", `bytes ${start}-${end}/${size}`);
 
       xhr.onload = function () {
@@ -38,6 +66,14 @@ export default async function chunkedUpload(
       xhr.onerror = function () {
         reject(this.responseText);
       };
+
+      // add upload progress event listener
+      xhr.upload.addEventListener("progress", function (e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded * 100) / e.total);
+          console.log(`${percent}% of the file has been uploaded`);
+        }
+      });
 
       xhr.send(formData);
     });
@@ -59,3 +95,5 @@ export default async function chunkedUpload(
 
   await uploadFile(file);
 }
+
+export default chunkedUpload;
